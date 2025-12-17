@@ -31,7 +31,7 @@ A real-time 3D LIDAR scanning system using an STM32 Nucleo F401RE microcontrolle
 | Servo GND | GND | CN6 |
 | Servo VCC | +5V | CN6 |
 
-**⚠️ CRITICAL**: The LIDAR TX output must connect to D2 (PA10), which is the RX pin for HardwareSerial. Incorrect pin connections will result in no data being received.
+** CRITICAL**: The LIDAR TX output must connect to D2 (PA10), which is the RX pin for HardwareSerial. Incorrect pin connections will result in no data being received.
 
 ## Software
 
