@@ -3,14 +3,13 @@
 
 // --- Config ---
 #define SERVO_PIN D7
-#define LIDAR_RX_PIN                                                           \
-  PA10 // Standard RX pin for Serial1 on Nucleo F401RE usually (Check Pinout if
-       // issues) or use Serial2.
-// Note: On Nucleo, 'Serial' is USB. 'Serial1' is usually PA9/PA10.
+// Serial2: Lidar Connection (PA3 = RX, PA2 = TX)
+// Note: On Nucleo, 'Serial' is USB. 'Serial2' is USART2 (PA2/PA3).
 // User said: "TX pin from lidar is connected to the RX pin on stm"
-// We will use Serial1 for Lidar.
 #define LIDAR_BAUD 230400
-#define USB_BAUD 115200
+#define USB_BAUD 230400
+// Instantiate Serial for Lidar on PA10 (RX) and PA9 (TX)
+HardwareSerial LidarSerial(PA10, PA9);
 
 Servo myServo;
 int currentAngle = 90;
@@ -36,15 +35,20 @@ int bufferIndex = 0;
 void setup() {
   // Serial: USB Debugging (Send data to PC)
   Serial.begin(USB_BAUD);
+  
+  delay(100);
 
   // Serial1: Lidar Connection (PA10 = RX, PA9 = TX)
-  // Ensure Lidar is connected to PA10 (RX) on the Nucleo
-  Serial1.begin(LIDAR_BAUD);
+  // Connect Lidar TX to Pin D2 (PA10) on the Nucleo
+  // Connect Lidar RX to Pin D8 (PA9) on the Nucleo
+  LidarSerial.begin(LIDAR_BAUD);
 
   myServo.attach(SERVO_PIN);
   myServo.write(currentAngle);
 
   delay(100);
+  
+
 }
 
 // Simple CRC8 Check (LD19 usually uses Checksum, sum of bytes)
@@ -126,11 +130,11 @@ void loop() {
   }
 
   // Lidar Parsing
-  // Read from Serial1 (Lidar)
-  while (Serial1.available()) {
-    uint8_t c = Serial1.read();
+  // Read from Serial2 (PA3 = RX, PA2 = TX)
+  while (Serial2.available()) {
+    uint8_t c = Serial2.read();
 
-    // State machine or sliding window to find header 0x54
+    // State machine to find header 0x54
     if (bufferIndex == 0) {
       if (c == 0x54) {
         rxBuffer[bufferIndex++] = c;
